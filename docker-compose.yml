@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  drone-server:
+    image: drone/drone
+    restart: always
+    ports:
+      - 8080:80
+    #   - 4430:443
+    volumes:
+      - drone:/var/lib/drone
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      - DRONE_LOGS_DEBUG=true
+      - DRONE_LOGS_TEXT=true
+      - DRONE_LOGS_PRETTY=true
+      - DRONE_LOGS_COLOR=true
+      - DRONE_LOGS_TRACE=true
+    container_name: local_drone_server
+  drone-runner:
+    image: drone/drone-runner-docker
+    restart: always
+    # command: agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 3000:3000
+    depends_on:
+      - drone-server
+    env_file:
+      - ./.env
+    container_name: local_drone_runner
+volumes:
+  drone:
+

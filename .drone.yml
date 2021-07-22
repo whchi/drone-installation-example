@@ -1,0 +1,44 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: backend
+    image: golang
+    commands:
+      - go build
+      - go test
+    when:
+      branch:
+        - main
+
+  - name: frontend
+    image: node
+    commands:
+      - npm install
+      - npm test
+    when:
+      branch:
+        - main
+
+  - name: publish
+    image: plugins/docker
+    settings:
+      repo: whchi/drone-example
+      registry: index.docker.io
+
+  - name: try
+    image: busybox
+    commands:
+      - cat README.md
+
+  # 2021-07-22 只支援很早之前的 integration，紀錄當下並未支援現有 slack 版本
+  # 依照官方文件操作才能正確安裝
+  - name: notify
+    image: plugins/slack
+    settings:
+      webhook: https://hooks.slack.com/services/...
+      channel: your-channel-name
+    when:
+      status: [success, failure]
